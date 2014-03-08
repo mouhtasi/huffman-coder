@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 
 import sys
-import os
-from operator import itemgetter
+import heapq
+from node import Node
 
 def frequency_dict(filename):
-    '''Read the file and create a dictionary with the read item and its
-    frequency.'''
+    '''Return dict with frequency and items in file.'''
     freq = {}
 
     with open(filename, 'r') as file:
@@ -19,14 +18,43 @@ def frequency_dict(filename):
 
     return freq
 
-def dict_to_tuples(freq_dict):
-    '''Convert frequency dict to a list of tuples.'''
+def dict_to_nodes(freq_dict):
+    '''Return list of nodes created from frequency dict.'''
     freq = []
 
     for item, value in freq_dict.items():
-        freq.append((item, value))
+        node = Node(value, item)
+        freq.append(node)
 
-    return sorted(freq, key=itemgetter(1))
+    return freq
+
+def sort_nodes(node1, node2):
+    '''Return a tuple with the lesser node first and the greater second.'''
+    if node1 < node2:
+        t = (node1, node2)
+    else:
+        t = (node2, node1)
+    return t
+
+def create_huff_tree(tree):
+    '''Return a huffman tree heap.'''
+    heapq.heapify(tree)
+
+    while len(tree) > 1:
+        node1 = heapq.heappop(tree)
+        node2 = heapq.heappop(tree)
+
+        smaller_node, greater_node = sort_nodes(node1, node2)
+        child_left, child_right = smaller_node, greater_node
+
+        parent_node = Node(child_left.weight + child_right.weight,
+                           child_left.value + child_right.value)
+        parent_node.set_children(child_left, child_right)
+
+        heapq.heappush(tree, parent_node)
+
+    return tree
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
@@ -35,4 +63,5 @@ if __name__ == '__main__':
     elif len(sys.argv) > 1:
         filename = sys.argv[1]
         freq_dict = frequency_dict(filename)
-        freq_list = dict_to_tuples(freq_dict)
+        freq_list = dict_to_nodes(freq_dict)
+        tree = create_huff_tree(freq_list)
