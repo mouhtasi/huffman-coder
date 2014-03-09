@@ -16,6 +16,7 @@ def frequency_dict(filename):
                 else:
                     freq[item] = 1
 
+    freq = add_pseudo_eof(freq)
     return freq
 
 def dict_to_nodes(freq_dict):
@@ -27,6 +28,12 @@ def dict_to_nodes(freq_dict):
         freq.append(node)
 
     return freq
+
+def add_pseudo_eof(freq_dict):
+    '''Return the frequency dict with the pseudo end-of-file char added.'''
+    peof = '■'
+    freq_dict['■'] = 1
+    return freq_dict
 
 def sort_nodes(node1, node2):
     '''Return a tuple with the lesser node first and the greater second.'''
@@ -65,3 +72,4 @@ if __name__ == '__main__':
         freq_dict = frequency_dict(filename)
         freq_list = dict_to_nodes(freq_dict)
         tree = create_huff_tree(freq_list)
+        print(tree)
