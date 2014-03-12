@@ -4,8 +4,9 @@ import sys
 import heapq
 from node import Node
 import array
+import pickle
 
-def frequency_dict(filename, peof):
+def frequency_dict(filename):
     '''Return dict with frequency and items in file.'''
     freq = {}
 
@@ -17,7 +18,6 @@ def frequency_dict(filename, peof):
                 else:
                     freq[item] = 1
 
-    freq = add_pseudo_eof(freq, peof)
     return freq
 
 def dict_to_nodes(freq_dict):
@@ -30,9 +30,8 @@ def dict_to_nodes(freq_dict):
 
     return freq
 
-def add_pseudo_eof(freq_dict, peof):
-    '''Return the frequency dict with the pseudo end-of-file char added.'''
-    freq_dict[peof] = 1
+def add_pseudo_eof(freq_dict):
+    '''Return the frequency dict.'''
     return freq_dict
 
 def create_huff_tree(tree):
@@ -54,11 +53,17 @@ def create_huff_tree(tree):
     return tree
 
 def get_leaves(node, leaves, prefix=''):
+    '''Modify leaves dict by adding items and their bit sequence.'''
     if not node.left and not node.right: # leaf
         leaves[node.value] = prefix
     else:
         get_leaves(node.left, leaves, prefix + '0')
         get_leaves(node.right, leaves, prefix + '1')
+
+def write_header_file(tree, filename='header'):
+    '''Create a header file containing the huffman tree.'''
+    with open(filename, 'wb') as file:
+        pickle.dump(tree, file)
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
@@ -66,11 +71,11 @@ if __name__ == '__main__':
         sys.exit(2)
     elif len(sys.argv) > 1:
         filename = sys.argv[1]
-        peof = '■'
 
-        freq_dict = frequency_dict(filename, peof)
+        freq_dict = frequency_dict(filename,)
         freq_list = dict_to_nodes(freq_dict)
         tree = create_huff_tree(freq_list)
-        leave = {}
-        get_leaves(heapq.heappop(tree), leave)
-        #print (sorted(list(leave.items())))
+        leaves = {}
+        get_leaves(heapq.heappop(tree), leaves)
+        #print (sorted(list(leaves.items())))
+        write_header_file(tree)
